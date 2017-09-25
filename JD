@@ -1,10 +1,15 @@
 package niewei.test4;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Collection;  
-import java.util.Map;  
+import java.util.Map;
+import java.util.Random;
 import java.util.ArrayList;  
-  
+ 
+/*假设有一个list容量只有10，而你的数据库的数据有100个，访问是随机的，
+请基于访问次数，做一个LRU算法的小型缓存。注意线程安全！*/
+
 public class LRUCache<K,V> {  
   
 private static final float   hashTableLoadFactor = 0.75f;  
@@ -16,8 +21,7 @@ private int                  cacheSize;
 public LRUCache (int cacheSize) {  
    this.cacheSize = cacheSize;  
    int hashTableCapacity = (int)Math.ceil(cacheSize / hashTableLoadFactor) + 1;  
-   map = new LinkedHashMap<K,V>(hashTableCapacity, hashTableLoadFactor, true) {  
-      // (an anonymous inner class)  
+   map = new LinkedHashMap<K,V>(hashTableCapacity, hashTableLoadFactor, true) {   
       private static final long serialVersionUID = 1;  
       @Override protected boolean removeEldestEntry (Map.Entry<K,V> eldest) {  
          return size() > LRUCache.this.cacheSize; }}; }  
@@ -46,22 +50,21 @@ public synchronized Collection<Map.Entry<K,V>> getAll() {
 
 
 public static void main (String[] args) {  
-   LRUCache<String,String> list = new LRUCache<String, String>(10);  
- 
-   list.put ("1", "one");                           // 1  
-   list.put ("2", "two");                           // 2 1  
-   list.put ("3", "three");                         // 3 2 1  
-   list.put ("4", "four");                          // 4 3 2 1 
-   list.put ("5", "five");                          // 5 4 3 2 1
-   list.put ("6", "six");                           // 6 5 4 3 2 1
-   list.put ("7", "seven");                         // 7 6 5 4 3 2 1
-   list.put ("8", "eight");                         // 8 7 6 5 4 3 2 1
-   list.put ("9", "nine");                          // 9 8 7 6 5 4 3 2 1
-   list.put ("10", "ten");                          // 10 9 8 7 6 5 4 3 2 1 
-   list.put ("11", "eleven");                       // 11 10 9 8 7 6 5 4 3 2
-   
-
-   for (Map.Entry<String, String> e : list.getAll())  
-      System.out.println (e.getKey() + " : " + e.getValue()); 
-  }
+	
+   List<String> list1 = new ArrayList<>();
+   Random  r = new Random();
+  //给list1设置100个
+   for(int i=0;i<100;i++){
+	   list1.add(""+i+"");
+   }
+   LRUCache<String,String> list2 = new LRUCache<String, String>(10); 
+   //添加10个,结果0-9
+   for(int i=0;i<10;i++){
+	   list2.put(""+i+"",list1.get(r.nextInt(100)));
+   }
+   //添加11个,结果为1-10
+   list2.put("10", list1.get(r.nextInt(100)));
+   for (Map.Entry<String, String> e : list2.getAll())  
+	      System.out.println (e.getKey() + " : " + e.getValue()); 
+	  }
 }
